@@ -12,8 +12,9 @@ static void	exec(char *cmd, char **env)
 		ft_putstr_fd("Pipex: command not found: ", 2);
 		ft_putendl_fd(split_cmd[0], 2);
 		ft_free(split_cmd);
-		exit(0);
+		exit(127);
 	}
+	ft_free(split_cmd);
 }
 
 static void	child(int *fds, char **argv, char **env)
@@ -47,16 +48,17 @@ int main(int argc, char **argv, char **envp)
 	if (argc != 5)
 	{
 		ft_putstr_fd("Error: Wrong number of arguments\n", 2);
-		return (1);
+		exit(EXIT_FAILURE);
 	}
 	if (pipe(fds) == -1)
 	{
 		ft_putstr_fd("Error: Pipe failed\n", 2);
-		return (1);
+		exit(EXIT_FAILURE);
 	}
 	pid = fork();
 	if (!pid)
 		child(fds, argv, envp);
 	parent(fds, argv, envp);
-	return (0);
+	ft_putstr_fd("Your pipes worked successfully", 1);
+	exit(EXIT_SUCCESS);
 }

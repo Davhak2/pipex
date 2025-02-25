@@ -59,13 +59,13 @@ int	ft_open(char *file, int val)
 	int	fd;
 
 	if (val == 0)
-		fd = open(file, O_RDONLY, 0777);
+		fd = open(file, O_RDONLY);
 	if (val == 1)
 		fd = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0777);
 	if (fd == -1)
 	{
 		ft_putstr_fd("Error, Can't open file\nGood Luck! ", 2);
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 	return (fd);
 }
