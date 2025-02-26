@@ -1,20 +1,24 @@
 #include "pipex.h"
 
-static void	exec(char *cmd, char **env)
+void	exec(char *cmd, char **env)
 {
 	char	**split_cmd;
 	char	*path;
 
 	split_cmd = ft_split(cmd, ' ');
 	path = get_path(split_cmd[0], env);
-	if (execve(path, split_cmd, env) == -1)
+	if (!path)
 	{
-		ft_putstr_fd("Pipex: command not found: ", 2);
-		ft_putendl_fd(split_cmd[0], 2);
+		ft_putstr_fd("pipex: ", 2);
+		ft_putstr_fd(split_cmd[0], 2);
+		ft_putstr_fd(": command not found\n", 2);
 		ft_free(split_cmd);
 		exit(127);
 	}
+	execve(path, split_cmd, env);
+	perror("pipex");
 	ft_free(split_cmd);
+	exit(127);
 }
 
 static void	child(int *fds, char **argv, char **env)

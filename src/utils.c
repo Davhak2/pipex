@@ -30,41 +30,57 @@ char	*get_path(char *cmd, char **env)
 {
 	int		i;
 	char	*exec;
-	char	**path;
 	char	*path_part;
-	char	**split_cmd;
+	char	**path;
+	char	*default_path;
 
+	if (!cmd)
+		return (NULL);
+	if (ft_strchr(cmd, '/'))
+	{
+		if (access(cmd, F_OK | X_OK) == 0)
+			return (ft_strdup(cmd));
+		else
+			return (NULL);
+	}
+	default_path = "/bin:/usr/bin";
+	path = my_getenv("PATH", env) ? ft_split(my_getenv("PATH", env), ':') : ft_split(default_path, ':');
+	if (!path)
+		return (NULL);
 	i = -1;
-	path = ft_split(my_getenv("PATH", env), ':');
-	split_cmd = ft_split(cmd, ' ');
 	while (path[++i])
 	{
 		path_part = ft_strjoin(path[i], "/");
-		exec = ft_strjoin(path_part, split_cmd[0]);
+		exec = ft_strjoin(path_part, cmd);
 		free(path_part);
 		if (access(exec, F_OK | X_OK) == 0)
 		{
-			ft_free(split_cmd);
+			ft_free(path);
 			return (exec);
 		}
 		free(exec);
 	}
 	ft_free(path);
-	ft_free(split_cmd);
-	return (cmd);
+	return (NULL);
 }
 
-int	ft_open(char *file, int val)
+
+int	ft_open(char *file, int flag)
 {
 	int	fd;
 
-	if (val == 0)
+	if (flag == 0)
 		fd = open(file, O_RDONLY);
-	if (val == 1)
-		fd = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0777);
+	else if (flag == 1)
+		fd = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+	else
+		exit(EXIT_FAILURE);
 	if (fd == -1)
 	{
-		ft_putstr_fd("Error, Can't open file\nGood Luck! ", 2);
+		ft_putstr_fd("pipex: ", 2);
+		ft_putstr_fd(file, 2);
+		ft_putstr_fd(": ", 2);
+		perror("");
 		exit(EXIT_FAILURE);
 	}
 	return (fd);
