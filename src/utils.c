@@ -1,22 +1,17 @@
 #include "pipex.h"
 
-void	ft_free(char **tab)
+void    ft_free(char **tab)
 {
-	int	i;
-
-	i = -1;
+	int i = -1;
 	while (tab[++i])
 		free(tab[i]);
 	free(tab);
 }
 
-char	*my_getenv(char *var, char **env)
+char    *my_getenv(char *var, char **env)
 {
-	int		i;
-	size_t	len;
-
-	i = 0;
-	len = ft_strlen(var);
+	int i = 0;
+	size_t len = ft_strlen(var);
 	while (env[i])
 	{
 		if (ft_strncmp(env[i], var, len) == 0 && env[i][len] == '=')
@@ -26,16 +21,12 @@ char	*my_getenv(char *var, char **env)
 	return (NULL);
 }
 
-char	*get_path(char *cmd, char **env)
+char    *get_path(char *cmd, char **env)
 {
-	int		i;
-	char	*exec;
-	char	*path_part;
-	char	**path;
-	char	*default_path;
+	t_path path;
 
-	if (!cmd)
-		return (NULL);
+	path.i = -1;
+	path.env_path = my_getenv("PATH", env);
 	if (ft_strchr(cmd, '/'))
 	{
 		if (access(cmd, F_OK | X_OK) == 0)
@@ -43,31 +34,30 @@ char	*get_path(char *cmd, char **env)
 		else
 			return (NULL);
 	}
-	default_path = "/bin:/usr/bin";
-	path = my_getenv("PATH", env) ? ft_split(my_getenv("PATH", env), ':') : ft_split(default_path, ':');
-	if (!path)
+	if (!path.env_path)
 		return (NULL);
-	i = -1;
-	while (path[++i])
+	path.dirs = ft_split(path.env_path, ':');
+	if (!path.dirs)
+		return (NULL);
+	while (path.dirs[++path.i])
 	{
-		path_part = ft_strjoin(path[i], "/");
-		exec = ft_strjoin(path_part, cmd);
-		free(path_part);
-		if (access(exec, F_OK | X_OK) == 0)
+		path.part = ft_strjoin(path.dirs[path.i], "/");
+		path.exec = ft_strjoin(path.part, cmd);
+		free(path.part);
+		if (access(path.exec, F_OK | X_OK) == 0)
 		{
-			ft_free(path);
-			return (exec);
+			ft_free(path.dirs);
+			return (path.exec);
 		}
-		free(exec);
+		free(path.exec);
 	}
-	ft_free(path);
+	ft_free(path.dirs);
 	return (NULL);
 }
 
-
-int	ft_open(char *file, int flag)
+int ft_open(char *file, int flag)
 {
-	int	fd;
+	int fd;
 
 	if (flag == 0)
 		fd = open(file, O_RDONLY);
@@ -75,6 +65,7 @@ int	ft_open(char *file, int flag)
 		fd = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0666);
 	else
 		exit(EXIT_FAILURE);
+
 	if (fd == -1)
 	{
 		ft_putstr_fd("pipex: ", 2);

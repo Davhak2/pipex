@@ -1,68 +1,73 @@
 #include "pipex.h"
 
-void	exec(char *cmd, char **env)
+void exec_cmd(t_cmd *cmd, char **env)
 {
-	char	**split_cmd;
-	char	*path;
-
-	split_cmd = ft_split(cmd, ' ');
-	path = get_path(split_cmd[0], env);
-	if (!path)
+	if (!cmd->path)
 	{
 		ft_putstr_fd("pipex: ", 2);
-		ft_putstr_fd(split_cmd[0], 2);
+		ft_putstr_fd(cmd->args[0], 2);
 		ft_putstr_fd(": command not found\n", 2);
-		ft_free(split_cmd);
+		ft_free(cmd->args);
 		exit(127);
 	}
-	execve(path, split_cmd, env);
+	execve(cmd->path, cmd->args, env);
 	perror("pipex");
-	ft_free(split_cmd);
+	ft_free(cmd->args);
 	exit(127);
 }
 
-static void	child(int *fds, char **argv, char **env)
+void child_process(t_pipex *pipex)
 {
-	int	fd;
+	int fd = ft_open(pipex->argv[1], 0);
+	t_cmd cmd;
 
-	fd = ft_open(argv[1], 0);
 	dup2(fd, 0);
-	dup2(fds[1], 1);
-	close(fds[0]);
-	exec(argv[2], env);
+	dup2(pipex->fds[1], 1);
+	close(pipex->fds[0]);
+	cmd.args = ft_split(pipex->argv[2], ' ');
+	cmd.path = get_path(cmd.args[0], pipex->env);
+	exec_cmd(&cmd, pipex->env);
 }
 
-static void	parent(int *fds, char **argv, char **env)
+void parent_process(t_pipex *pipex)
 {
-	int	fd;
+	int fd = ft_open(pipex->argv[4], 1);
+	t_cmd cmd;
 
-	fd = ft_open(argv[4], 1);
 	dup2(fd, 1);
-	dup2(fds[0], 0);
-	close(fds[1]);
-	exec(argv[3], env);
-}
+	dup2(pipex->fds[0], 0);
+	close(pipex->fds[1]);
 
+	cmd.args = ft_split(pipex->argv[3], ' ');
+	cmd.path = get_path(cmd.args[0], pipex->env);
+	exec_cmd(&cmd, pipex->env);
+}
 
 int main(int argc, char **argv, char **envp)
 {
-	int		fds[2];
-	pid_t	pid;
+	t_pipex pipex;
+	pid_t pid;
 
 	if (argc != 5)
 	{
 		ft_putstr_fd("Error: Wrong number of arguments\n", 2);
 		exit(EXIT_FAILURE);
 	}
-	if (pipe(fds) == -1)
+
+	pipex.env = envp;
+	pipex.argv = argv;
+
+	if (pipe(pipex.fds) == -1)
 	{
 		ft_putstr_fd("Error: Pipe failed\n", 2);
 		exit(EXIT_FAILURE);
 	}
+
 	pid = fork();
 	if (!pid)
-		child(fds, argv, envp);
-	parent(fds, argv, envp);
-	ft_putstr_fd("Your pipes worked successfully", 1);
+		child_process(&pipex);
+	parent_process(&pipex);
+
+	ft_putstr_fd("Your pipes worked successfully\n", 1);
 	exit(EXIT_SUCCESS);
 }
