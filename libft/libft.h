@@ -3,15 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   libft.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: davihako <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: luminous <luminous@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/12 15:39:49 by davihako          #+#    #+#             */
-/*   Updated: 2025/01/12 15:39:52 by davihako         ###   ########.fr       */
+/*   Updated: 2025/03/19 03:38:10 by luminous         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef LIBFT_H
 # define LIBFT_H
+
+# define BUFFER_SIZE 42
+
 # include <stdlib.h>
 # include <unistd.h>
 
@@ -50,6 +53,15 @@ void				ft_putchar_fd(char c, int fd);
 void				ft_putstr_fd(char *s, int fd);
 void				ft_putendl_fd(char *s, int fd);
 void				ft_putnbr_fd(int n, int fd);
+
+// get_next_line
+
+char				*get_next_line(int fd);
+char				*ft_strchr_gnl(const char *s, int c);
+size_t				ft_strlen_gnl(const char *str);
+void				*ft_memset_gnl(void *b, int c, size_t len);
+void				*ft_calloc_gnl(size_t count, size_t size);
+char				*ft_strjoin_gnl(const char *s1, const char *s2);
 
 // bonus part
 
