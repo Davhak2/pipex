@@ -13,11 +13,13 @@
 
 typedef struct s_pipex
 {
-	pid_t	pid;
 	int		fds[2];
-	char	**env;
+	int		in_fd;
+	int		out_fd;
+	pid_t	pid;
 	char	**argv;
-}	t_pipex;
+	char	**env;
+} t_pipex;
 
 typedef struct s_cmd
 {
@@ -38,8 +40,10 @@ char	*my_getenv(char *var, char **env);
 char	*get_path(char *cmd, char **env);
 int		ft_open(char *file, int val);
 void	ft_free(char **tab);
-void	exec_cmd(t_cmd *cmd, char **env);
+void	exec_cmd(char *cmd, char **env);
 void	child_process(t_pipex *pipex);
 void	parent_process(t_pipex *pipex);
+void	norm_handle1(char *msg, int exit_code);
+
 
 #endif
